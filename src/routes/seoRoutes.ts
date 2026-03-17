@@ -4,6 +4,7 @@ import { ENV } from "../config/env.js";
 
 const router = Router();
 
+
 router.get("/sitemap.xml", async (_req: Request, res: Response) => {
   try {
     const baseUrl = ENV.clientUrl || "https://auth-landing-pagebymhc.com";
