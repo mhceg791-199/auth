@@ -74,6 +74,8 @@
 //   return app(req, res);
 // }
 
+////////////////////////////////////////////////////////////
+
 
 import express from "express";
 import compression from "compression";
@@ -139,6 +141,8 @@ export default async function handler(req: any, res: any) {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 // import express from "express";
 // import compression from "compression";
 // import cookieParser from "cookie-parser";
@@ -151,11 +155,14 @@ export default async function handler(req: any, res: any) {
 // import { requestLogger } from "./middlewares/requestLogger.js";
 // import { generalLimiter } from "./middlewares/rateLimiter.js";
 // import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+// import { handleStripeWebhook } from "./webhooks/stripeWebhook.js";
 // import routes from "./routes/index.js";
 // import { logger } from "./utils/logger.js";
 
 // const app = express();
 
+// // ─── Stripe webhook (MUST be before express.json()) ──────────
+// app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
 
 // // ─── Global middleware ───────────────────────────────────────
 // app.use(helmetConfig);
