@@ -12,4 +12,5 @@ router.get("/health", (_req, res) => {
   res.json({ success: true, message: "Auth Landing Page API is running", timestamp: new Date().toISOString() });
 });
 
+
 export default router;
