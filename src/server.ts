@@ -128,16 +128,23 @@ app.use(errorHandler);
 // ✅ دي أهم حاجة في Vercel
 export default async function handler(req: any, res: any) {
   try {
+    console.log("START FUNCTION");
+
     if (!isConnected) {
+      console.log("Connecting DB...");
       await connectDatabase();
+      console.log("DB Connected");
       isConnected = true;
-      logger.info("Database connected ✅");
     }
 
     return app(req, res);
-  } catch (error) {
-    logger.error("Server error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+  } catch (error: any) {
+    console.error("CRASH:", error);
+
+    return res.status(500).json({
+      message: "Server crashed",
+      error: error.message,
+    });
   }
 }
 
