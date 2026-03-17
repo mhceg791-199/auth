@@ -3,13 +3,13 @@ import { register, login, logout, getMe, updateProfile, changePassword } from ".
 import { requireAuth } from "../middlewares/auth.js";
 import { authLimiter } from "../middlewares/rateLimiter.js";
 
-const router = Router();
+const authRoutes = Router();
 
-router.post("/register", authLimiter, register);
-router.post("/login", authLimiter, login);
-router.post("/logout", logout);
-router.get("/me", requireAuth, getMe);
-router.put("/profile", requireAuth, updateProfile);
-router.put("/password", requireAuth, changePassword);
+authRoutes.post("/register", authLimiter, register);
+authRoutes.post("/login", authLimiter, login);
+authRoutes.post("/logout", logout);
+authRoutes.get("/me", requireAuth, getMe);
+authRoutes.put("/profile", requireAuth, updateProfile);
+authRoutes.put("/password", requireAuth, changePassword);
 
-export default router;
+export default authRoutes;
