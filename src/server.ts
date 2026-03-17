@@ -80,7 +80,6 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 
-import { ENV } from "./config/env.js";
 import { connectDatabase } from "./config/database.js";
 import { helmetConfig, corsConfig } from "./config/security.js";
 import { swaggerSpec } from "./config/swagger.js";
