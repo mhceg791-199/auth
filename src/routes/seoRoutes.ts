@@ -5,7 +5,7 @@ import { ENV } from "../config/env.js";
 const router = Router();
 
 router.get("/robots.txt", (_req: Request, res: Response) => {
-  const baseUrl = ENV.clientUrl || "https://auth-landing-pagebymhc.com";
+  const baseUrl = ENV.clientUrl || "https://auth-client-three-umber.vercel.app/";
   res.header("Content-Type", "text/plain");
   res.send(generateRobotsTxt(baseUrl));
 });
