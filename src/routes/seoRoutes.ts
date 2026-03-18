@@ -10,4 +10,5 @@ router.get("/robots.txt", (_req: Request, res: Response) => {
   res.send(generateRobotsTxt(baseUrl));
 });
 
+
 export default router;
