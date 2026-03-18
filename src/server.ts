@@ -77,11 +77,85 @@
 ////////////////////////////////////////////////////////////
 
 
+// import express from "express";
+// import compression from "compression";
+// import cookieParser from "cookie-parser";
+// import swaggerUi from "swagger-ui-express";
+
+// import { connectDatabase } from "./config/database.js";
+// import { helmetConfig, corsConfig } from "./config/security.js";
+// import { swaggerSpec } from "./config/swagger.js";
+// import { requestLogger } from "./middlewares/requestLogger.js";
+// import { generalLimiter } from "./middlewares/rateLimiter.js";
+// import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+// import routes from "./routes/index.js";
+// import { logger } from "./utils/logger.js";
+
+// const app = express();
+
+// // مهم: نمنع تكرار الاتصال بالداتابيز
+// let isConnected = false;
+
+// // ─── Middleware ─────────────────────────
+// app.use(helmetConfig);
+// app.use(corsConfig);
+// app.use(compression());
+// app.use(express.json({ limit: "10mb" }));
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cookieParser());
+// app.use(requestLogger);
+// app.use(generalLimiter);
+
+// // ─── Swagger ────────────────────────────
+// app.use(
+//   "/api/docs",
+//   swaggerUi.serve,
+//   swaggerUi.setup(swaggerSpec, {
+//     customCss: ".swagger-ui .topbar { display: none }",
+//     customSiteTitle: "Auth Landing Page API Docs",
+//   })
+// );
+
+// app.get("/api/docs.json", (_req, res) => res.json(swaggerSpec));
+
+// // ─── Routes ─────────────────────────────
+// app.use("/api", routes);
+
+// // ─── Errors ─────────────────────────────
+// app.use("/api/*", notFoundHandler);
+// app.use(errorHandler);
+
+// // ✅ دي أهم حاجة في Vercel
+// export default async function handler(req: any, res: any) {
+//   try {
+//     console.log("START FUNCTION");
+
+//     if (!isConnected) {
+//       console.log("Connecting DB...");
+//       await connectDatabase();
+//       console.log("DB Connected");
+//       isConnected = true;
+//     }
+
+//     return app(req, res);
+//   } catch (error: any) {
+//     console.error("CRASH:", error);
+
+//     return res.status(500).json({
+//       message: "Server crashed",
+//       error: error.message,
+//     });
+//   }
+// }
+
+///////////////////////////////////////////////////////////////////////////////
+
 import express from "express";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
 
+import { ENV } from "./config/env.js";
 import { connectDatabase } from "./config/database.js";
 import { helmetConfig, corsConfig } from "./config/security.js";
 import { swaggerSpec } from "./config/swagger.js";
@@ -93,10 +167,8 @@ import { logger } from "./utils/logger.js";
 
 const app = express();
 
-// مهم: نمنع تكرار الاتصال بالداتابيز
-let isConnected = false;
 
-// ─── Middleware ─────────────────────────
+// ─── Global middleware ───────────────────────────────────────
 app.use(helmetConfig);
 app.use(corsConfig);
 app.use(compression());
@@ -106,127 +178,52 @@ app.use(cookieParser());
 app.use(requestLogger);
 app.use(generalLimiter);
 
-// ─── Swagger ────────────────────────────
-app.use(
-  "/api/docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec, {
-    customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "Auth Landing Page API Docs",
-  })
-);
-
+// ─── API Documentation ──────────────────────────────────────
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: ".swagger-ui .topbar { display: none }",
+  customSiteTitle: "Auth Landing Page API Docs",
+}));
 app.get("/api/docs.json", (_req, res) => res.json(swaggerSpec));
 
-// ─── Routes ─────────────────────────────
+// ─── API Routes ─────────────────────────────────────────────
 app.use("/api", routes);
 
-// ─── Errors ─────────────────────────────
+// ─── Error handling ─────────────────────────────────────────
 app.use("/api/*", notFoundHandler);
 app.use(errorHandler);
 
-// ✅ دي أهم حاجة في Vercel
-export default async function handler(req: any, res: any) {
+// ─── Start server ───────────────────────────────────────────
+async function start(): Promise<void> {
   try {
-    console.log("START FUNCTION");
+    await connectDatabase();
 
-    if (!isConnected) {
-      console.log("Connecting DB...");
-      await connectDatabase();
-      console.log("DB Connected");
-      isConnected = true;
-    }
-
-    return app(req, res);
-  } catch (error: any) {
-    console.error("CRASH:", error);
-
-    return res.status(500).json({
-      message: "Server crashed",
-      error: error.message,
+    const port = ENV.port;
+    app.listen(port, () => {
+      logger.info(`🏰 Auth Landing Page API running on port ${port}`);
+      logger.info(`📚 API Docs: http://localhost:${port}/api/docs`);
+      logger.info(`🔧 Environment: ${ENV.nodeEnv}`);
     });
+  } catch (error) {
+    logger.error("Failed to start server:", error);
+    process.exit(1);
   }
 }
 
-///////////////////////////////////////////////////////////////////////////////
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM received, shutting down gracefully...");
+  process.exit(0);
+});
 
-// import express from "express";
-// import compression from "compression";
-// import cookieParser from "cookie-parser";
-// import swaggerUi from "swagger-ui-express";
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled Rejection:", reason);
+});
 
-// import { ENV } from "./config/env.js";
-// import { connectDatabase } from "./config/database.js";
-// import { helmetConfig, corsConfig } from "./config/security.js";
-// import { swaggerSpec } from "./config/swagger.js";
-// import { requestLogger } from "./middlewares/requestLogger.js";
-// import { generalLimiter } from "./middlewares/rateLimiter.js";
-// import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
-// import { handleStripeWebhook } from "./webhooks/stripeWebhook.js";
-// import routes from "./routes/index.js";
-// import { logger } from "./utils/logger.js";
+process.on("uncaughtException", (error) => {
+  logger.error("Uncaught Exception:", error);
+  process.exit(1);
+});
 
-// const app = express();
+start();
 
-// // ─── Stripe webhook (MUST be before express.json()) ──────────
-// app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), handleStripeWebhook);
-
-// // ─── Global middleware ───────────────────────────────────────
-// app.use(helmetConfig);
-// app.use(corsConfig);
-// app.use(compression());
-// app.use(express.json({ limit: "10mb" }));
-// app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
-// app.use(requestLogger);
-// app.use(generalLimiter);
-
-// // ─── API Documentation ──────────────────────────────────────
-// app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-//   customCss: ".swagger-ui .topbar { display: none }",
-//   customSiteTitle: "Auth Landing Page API Docs",
-// }));
-// app.get("/api/docs.json", (_req, res) => res.json(swaggerSpec));
-
-// // ─── API Routes ─────────────────────────────────────────────
-// app.use("/api", routes);
-
-// // ─── Error handling ─────────────────────────────────────────
-// app.use("/api/*", notFoundHandler);
-// app.use(errorHandler);
-
-// // ─── Start server ───────────────────────────────────────────
-// async function start(): Promise<void> {
-//   try {
-//     await connectDatabase();
-
-//     const port = ENV.port;
-//     app.listen(port, () => {
-//       logger.info(`🏰 Auth Landing Page API running on port ${port}`);
-//       logger.info(`📚 API Docs: http://localhost:${port}/api/docs`);
-//       logger.info(`🔧 Environment: ${ENV.nodeEnv}`);
-//     });
-//   } catch (error) {
-//     logger.error("Failed to start server:", error);
-//     process.exit(1);
-//   }
-// }
-
-// // Graceful shutdown
-// process.on("SIGTERM", () => {
-//   logger.info("SIGTERM received, shutting down gracefully...");
-//   process.exit(0);
-// });
-
-// process.on("unhandledRejection", (reason) => {
-//   logger.error("Unhandled Rejection:", reason);
-// });
-
-// process.on("uncaughtException", (error) => {
-//   logger.error("Uncaught Exception:", error);
-//   process.exit(1);
-// });
-
-// start();
-
-// export default app;
+export default app;
