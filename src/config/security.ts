@@ -1,10 +1,17 @@
-import helmet from "helmet";
+// import helmet from "helmet";
 import cors from "cors";
 import { ENV } from "./env.js";
 
-export const helmetConfig = helmet({
+// export const helmetConfig = helmet({
+//   crossOriginResourcePolicy: { policy: "cross-origin" },
+//   contentSecurityPolicy: false, // Disable CSP for API server
+// });
+
+import * as helmet from "helmet";
+
+export const helmetConfig = (helmet as any)({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: false, // Disable CSP for API server
+  contentSecurityPolicy: false,
 });
 
 export const corsConfig = cors({
