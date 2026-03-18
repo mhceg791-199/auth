@@ -2,3 +2,5 @@
 
 
 // export default handler;
+
+export { default } from "../src/server";

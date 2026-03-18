@@ -7,9 +7,9 @@ import { ENV } from "./env.js";
 //   contentSecurityPolicy: false, // Disable CSP for API server
 // });
 
-import * as helmet from "helmet";
+import helmet from "helmet";
 
-export const helmetConfig = (helmet as any)({
+export const helmetConfig = helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false,
 });

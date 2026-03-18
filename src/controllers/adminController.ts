@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { User } from "../models/User.js";
-import { Address } from "../models/Address.js";
 import { NotFoundError, ValidationError } from "../utils/AppError.js";
 import { logger } from "../utils/logger.js";
 
